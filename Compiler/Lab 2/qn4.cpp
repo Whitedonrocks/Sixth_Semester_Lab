@@ -5,13 +5,35 @@
 #include <string>
 using namespace std;
 int main() {
+    cout << "Enter source code line by line." << endl;
+    cout << "Press Enter on a blank line to finish." << endl;
 
-    ifstream file("input.txt");
-
-    if (!file) {
-        cout << "File not found!" << endl;
+    ofstream outFile("input.txt");
+    if (!outFile) {
+        cout << "Unable to create input.txt" << endl;
         return 0;
     }
+
+    string line;
+    while (true) {
+        getline(cin, line);
+        if (line.empty()) break;
+        outFile << line << endl;
+    }
+    outFile.close();
+
+    ifstream file("input.txt");
+    if (!file) {
+        cout << "Unable to open input.txt for reading." << endl;
+        return 0;
+    }
+
+    string sourceCode;
+    while (getline(file, line)) {
+        sourceCode += line + "\n";
+    }
+    file.close();
+
     // Arrays to store tokens
     string keywords[100];
     string identifiers[100];
@@ -27,29 +49,39 @@ int main() {
     };
     char ch;
     string word;
-    while (file.get(ch)) {
-        // If character is a letter, make a word
+    int i = 0;
+    while (i < sourceCode.length()) {
+        ch = sourceCode[i];
+
         if (isalpha(ch)) {
             word = "";
-            while (isalpha(ch)) {
-                word = word + ch;
-                if (!file.get(ch))
-                    break;
+            while (i < sourceCode.length() && isalpha(sourceCode[i])) {
+                word += sourceCode[i];
+                i++;
             }
-            // Check whether word is keyword
+
             bool found = false;
-            for (int i = 0; i < 10; i++) {
-                if (word == key[i]) {
+            for (int j = 0; j < 10; j++) {
+                if (word == key[j]) {
                     found = true;
                     break;
                 }
             }
-            if (found)
-                keywords[k++] = word;
-            else {
+
+            if (found) {
                 bool alreadyExists = false;
-                for (int i = 0; i < id; i++) {
-                    if (identifiers[i] == word) {
+                for (int j = 0; j < k; j++) {
+                    if (keywords[j] == word) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (!alreadyExists)
+                    keywords[k++] = word;
+            } else {
+                bool alreadyExists = false;
+                for (int j = 0; j < id; j++) {
+                    if (identifiers[j] == word) {
                         alreadyExists = true;
                         break;
                     }
@@ -57,45 +89,62 @@ int main() {
                 if (!alreadyExists)
                     identifiers[id++] = word;
             }
-
-            // Put character back
-            if (file)
-                file.unget();
         }
-        // If character is a number
         else if (isdigit(ch)) {
             word = "";
-
-            while (isdigit(ch)) {
-                word = word + ch;
-
-                if (!file.get(ch))
-                    break;
+            while (i < sourceCode.length() && isdigit(sourceCode[i])) {
+                word += sourceCode[i];
+                i++;
             }
 
-            constants[c++] = word;
-
-            if (file)
-                file.unget();
+            bool alreadyExists = false;
+            for (int j = 0; j < c; j++) {
+                if (constants[j] == word) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if (!alreadyExists)
+                constants[c++] = word;
         }
-        // Operators
         else if (ch == '+' || ch == '-' ||
                  ch == '*' || ch == '/' ||
                  ch == '=' || ch == '<' ||
                  ch == '>') {
 
-            operators[op++] = ch;
+            string opSymbol(1, ch);
+            bool alreadyExists = false;
+            for (int j = 0; j < op; j++) {
+                if (operators[j] == opSymbol) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if (!alreadyExists)
+                operators[op++] = opSymbol;
+            i++;
         }
-        // Special symbols
         else if (ch == '(' || ch == ')' ||
                  ch == '{' || ch == '}' ||
                  ch == ';' || ch == ',' ||
                  ch == '[' || ch == ']') {
 
-            specialSymbols[sp++] = ch;
+            string sym(1, ch);
+            bool alreadyExists = false;
+            for (int j = 0; j < sp; j++) {
+                if (specialSymbols[j] == sym) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if (!alreadyExists)
+                specialSymbols[sp++] = sym;
+            i++;
+        }
+        else {
+            i++;
         }
     }
-    file.close();
     // Display results
     cout << "\nKeywords:\n";
     for (int i = 0; i < k; i++)

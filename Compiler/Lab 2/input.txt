@@ -1,5 +1,4 @@
-int x = 10;
-float y = 20;
-if (x < y) {
-    return x;
-}
+int x;
+hello world;
+{}
+;;
