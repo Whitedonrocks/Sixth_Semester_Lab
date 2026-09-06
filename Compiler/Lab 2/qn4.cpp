@@ -1,38 +1,35 @@
-// write a program to implement design of lexical analyser to recognize token (identifier, keyword, operator, constant and special symbol) etc.
+// Write a program to implement design of lexical analyser to recognize token (identifier, keyword, operator, constant and special symbol) etc.
+
 #include <iostream>
 #include <fstream>
 #include <cctype>
 #include <string>
 using namespace std;
+
 int main() {
-    cout << "Enter source code line by line." << endl;
-    cout << "Press Enter on a blank line to finish." << endl;
 
-    ofstream outFile("input.txt");
-    if (!outFile) {
-        cout << "Unable to create input.txt" << endl;
+    // First, write to file
+    ofstream outfile("input.txt");
+    if (!outfile) {
+        cout << "Cannot create file!" << endl;
         return 0;
     }
 
-    string line;
-    while (true) {
-        getline(cin, line);
-        if (line.empty()) break;
-        outFile << line << endl;
+    string input;
+    cout << "Write C++ code (type 'END' on a new line to finish):\n";
+    while (getline(cin, input)) {
+        if (input == "END") break;
+        outfile << input << "\n";
     }
-    outFile.close();
+    outfile.close();
 
+    // Now read from file
     ifstream file("input.txt");
+
     if (!file) {
-        cout << "Unable to open input.txt for reading." << endl;
+        cout << "File not found!" << endl;
         return 0;
     }
-
-    string sourceCode;
-    while (getline(file, line)) {
-        sourceCode += line + "\n";
-    }
-    file.close();
 
     // Arrays to store tokens
     string keywords[100];
@@ -40,127 +37,109 @@ int main() {
     string constants[100];
     string operators[100];
     string specialSymbols[100];
+
     int k = 0, id = 0, c = 0, op = 0, sp = 0;
+
     // List of keywords
     string key[] = {
         "int", "float", "char", "double",
         "if", "else", "for", "while",
         "return", "void"
     };
+
     char ch;
     string word;
-    int i = 0;
-    while (i < sourceCode.length()) {
-        ch = sourceCode[i];
 
+    while (file.get(ch)) {
+
+        // If character is a letter, make a word
         if (isalpha(ch)) {
-            word = "";
-            while (i < sourceCode.length() && isalpha(sourceCode[i])) {
-                word += sourceCode[i];
-                i++;
-            }
 
+            word = "";
+
+            while (isalpha(ch)) {
+                word = word + ch;
+                if (!file.get(ch))
+                    break;
+            }
+            // Check whether word is keyword
             bool found = false;
-            for (int j = 0; j < 10; j++) {
-                if (word == key[j]) {
+            for (int i = 0; i < 10; i++) {
+                if (word == key[i]) {
                     found = true;
                     break;
                 }
             }
+            if (found)
+                keywords[k++] = word;
+            else
+                identifiers[id++] = word;
 
-            if (found) {
-                bool alreadyExists = false;
-                for (int j = 0; j < k; j++) {
-                    if (keywords[j] == word) {
-                        alreadyExists = true;
-                        break;
-                    }
-                }
-                if (!alreadyExists)
-                    keywords[k++] = word;
-            } else {
-                bool alreadyExists = false;
-                for (int j = 0; j < id; j++) {
-                    if (identifiers[j] == word) {
-                        alreadyExists = true;
-                        break;
-                    }
-                }
-                if (!alreadyExists)
-                    identifiers[id++] = word;
-            }
+            // Put character back
+            if (file)
+                file.unget();
         }
+
+        // If character is a number
         else if (isdigit(ch)) {
+
             word = "";
-            while (i < sourceCode.length() && isdigit(sourceCode[i])) {
-                word += sourceCode[i];
-                i++;
+
+            while (isdigit(ch)) {
+                word = word + ch;
+
+                if (!file.get(ch))
+                    break;
             }
 
-            bool alreadyExists = false;
-            for (int j = 0; j < c; j++) {
-                if (constants[j] == word) {
-                    alreadyExists = true;
-                    break;
-                }
-            }
-            if (!alreadyExists)
-                constants[c++] = word;
+            constants[c++] = word;
+
+            if (file)
+                file.unget();
         }
+
+        // Operators
         else if (ch == '+' || ch == '-' ||
                  ch == '*' || ch == '/' ||
                  ch == '=' || ch == '<' ||
                  ch == '>') {
 
-            string opSymbol(1, ch);
-            bool alreadyExists = false;
-            for (int j = 0; j < op; j++) {
-                if (operators[j] == opSymbol) {
-                    alreadyExists = true;
-                    break;
-                }
-            }
-            if (!alreadyExists)
-                operators[op++] = opSymbol;
-            i++;
+            operators[op++] = ch;
         }
+
+        // Special symbols
         else if (ch == '(' || ch == ')' ||
                  ch == '{' || ch == '}' ||
                  ch == ';' || ch == ',' ||
                  ch == '[' || ch == ']') {
 
-            string sym(1, ch);
-            bool alreadyExists = false;
-            for (int j = 0; j < sp; j++) {
-                if (specialSymbols[j] == sym) {
-                    alreadyExists = true;
-                    break;
-                }
-            }
-            if (!alreadyExists)
-                specialSymbols[sp++] = sym;
-            i++;
-        }
-        else {
-            i++;
+            specialSymbols[sp++] = ch;
         }
     }
-    // Display results
-    cout << "\nKeywords:\n";
+
+    file.close();
+
+    cout << "Keywords:\n";
     for (int i = 0; i < k; i++)
         cout << keywords[i] << " ";
-    cout << "\n\nIdentifiers:\n";
+
+    cout << "\nIdentifiers:\n";
     for (int i = 0; i < id; i++)
         cout << identifiers[i] << " ";
-    cout << "\n\nConstants:\n";
+
+    cout << "\nConstants:\n";
     for (int i = 0; i < c; i++)
         cout << constants[i] << " ";
-    cout << "\n\nOperators:\n";
+
+    cout << "\nOperators:\n";
     for (int i = 0; i < op; i++)
         cout << operators[i] << " ";
-    cout << "\n\nSpecial Symbols:\n";
+
+    cout << "\nSpecial Symbols:\n";
     for (int i = 0; i < sp; i++)
         cout << specialSymbols[i] << " ";
+
     cout << endl;
+
     return 0;
 }

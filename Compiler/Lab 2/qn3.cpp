@@ -1,67 +1,56 @@
 // Write a C/C++ program to recognize strings under a*, a*b+, and abb.
+
 #include <iostream>
 #include <string>
 using namespace std;
 
-enum states {q0, q1, q2, dead};
-
-enum states delta(enum states state, char ch) {
-    enum states curr_state = dead;
-
-    switch (state) {
-        case q0:
-            if (ch == 'a')
-                curr_state = q1;
-            else if (ch == 'b')
-                curr_state = q2;
-            else
-                curr_state = dead;
-            break;
-
-        case q1:
-            if (ch == 'a')
-                curr_state = q1;
-            else if (ch == 'b')
-                curr_state = q2;
-            else
-                curr_state = dead;
-            break;
-
-        case q2:
-            if (ch == 'b')
-                curr_state = q2;
-            else
-                curr_state = dead;
-            break;
-
-        case dead:
-            curr_state = dead;
-            break;
-    }
-    return curr_state;
-}
-
 int main() {
-    string input;
-    char choice;
-    do{
-        cout << "Enter the input string: ";
-        getline(cin, input);
+    string s;
+    cout << "Enter a string: ";
+    getline(cin, s);
 
-        enum states curr_state = q0;
-        for (int i = 0; i < input.length(); i++) {
-            curr_state = delta(curr_state, input[i]);
-        }
+    bool isAStar = true;
+    bool isABPlus = true;
+    bool isAbb = false;
 
-        if (curr_state == q0 || curr_state == q1 || curr_state == q2) {
-            cout << "The string \"" << input << "\" is accepted." << endl;
-        } else {
-            cout << "The string \"" << input << "\" is rejected." << endl;
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] != 'a') {
+            isAStar = false;
         }
-        cout << "Do you want to continue? (Y,N): ";
-        cin >> choice;
-        cin.ignore();
-    }while(choice=='Y'||choice=='y');
-    return 0;
+    }
+
+    if (s == "abb") {
+        isAbb = true;
+    }
+
+    int i = 0;
+    while (i < s.length() && s[i] == 'a') {
+        i++;
+    }
+
+    if (i == s.length()) {
+        isABPlus = false;
+    }
+    else {
+        while (i < s.length() && s[i] == 'b') {
+            i++;
+        }
+        if (i != s.length()) {
+            isABPlus = false;
+        }
+    }
+
+    if (isAStar) {
+        cout << "Accepted under a*" << endl;
+    }
+    if (isABPlus) {
+        cout << "Accepted under a*b+" << endl;
+    }
+    if (isAbb) {
+        cout << "Accepted under abb" << endl;
+    }
+    if (!isAStar && !isABPlus && !isAbb) {
+        cout << "String is not accepted" << endl;
+    }
+return 0;
 }
-

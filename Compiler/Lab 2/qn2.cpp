@@ -40,9 +40,9 @@ int main()
 {
     string input;
     char ch;
-    int i=0;
     char choice;
     do{
+        int i=0;
         cout<<"Enter the input string:";
         cin>>input;
         ch=input[i];
