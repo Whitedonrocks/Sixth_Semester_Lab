@@ -1,0 +1,18 @@
+/* Write a lex program to check whether given input is digit or not. */
+%option noyywrap
+%{
+	#include<stdio.h>
+%}
+
+%%
+-[0-9]*[0-9]+ {printf("The give input is a number.\n");}
+[a-zA-Z]+ {printf("The give input is a character not a  number\n");}
+.* {printf("Invalid Please enter a number\n");};
+
+%%
+int main()
+{
+	printf("Enter the number\n");
+	yylex();
+	return 0;
+}

@@ -1,0 +1,17 @@
+/* Write a lex program to check whether given input is a vlaid mobile number. */
+%option noyywrap
+%{
+	#include<stdio.h>
+%}
+
+%%
+[9][0-9]{9} {printf("The give input is a valid mobile number.\n");}
+.* {printf("Invalid Please enter a valid number starting with 98 or 97 and has 10 digits\n");}
+
+%%
+int main()
+{
+	printf("Enter the phone number\n");
+	yylex();
+	return 0;
+}
