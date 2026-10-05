@@ -1,0 +1,27 @@
+%{
+#include <stdio.h>
+%}
+
+%%
+
+^[a-z]+$ { printf("The string contains only lowercase letters.\n"); }
+
+^[A-Z]+$ { printf("The string contains only uppercase letters.\n"); }
+
+^[a-zA-Z]+$ { printf("The string contains mixed case letters.\n"); }
+
+.* { printf("Invalid input. Enter alphabetic characters only.\n"); }
+
+%%
+
+int main()
+{
+    printf("Enter a string:\n");
+    yylex();
+    return 0;
+}
+
+int yywrap()
+{
+    return 1;
+}
